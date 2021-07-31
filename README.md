@@ -1,160 +1,254 @@
-# TSDX React User Guide
+# [react-better-scroll](https://github.com/zoyopo/react-better-scroll)
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
+> A vue plugins based on [better-scroll](https://github.com/ustbhuangyi/better-scroll)
 
-> This TSDX setup is meant for developing React component libraries (not apps!) that can be published to NPM. If you’re looking to build a React-based app, you should use `create-react-app`, `razzle`, `nextjs`, `gatsby`, or `react-static`.
+> 最近写移动端项目，下拉刷新、上拉加载的场景很常见，发现 [mint-ui](https://github.com/ElemeFE/mint-ui) 的 Loadmore 组件效果体验不尽如人意， [Vux](https://github.com/airyland/vux) 的 Scroller 组件作者不推荐使用也停止维护了，最后决定根据 better-scroll 封装成自己的 vue 组件，作者也提供了详细的教程。
 
-> If you’re new to TypeScript and React, checkout [this handy cheatsheet](https://github.com/sw-yx/react-typescript-cheatsheet/)
+# Example
 
-## Commands
+// todo
 
-TSDX scaffolds your new library inside `/src`, and also sets up a [Parcel-based](https://parceljs.org) playground for it inside `/example`.
+# 滚动原理
 
-The recommended workflow is to run TSDX in one terminal:
+由于 better-scroll 的滚动原理为：在滚动方向上，第一个子元素的长度超过了容器的长度。
 
-```bash
-npm start # or yarn start
+那么对于 Scroll 组件，其实就是内容元素 .list-content 在滚动方向上的长度必须大于容器元素 .wrapper。
+
+任何时候如果出现无法滚动的情况，都应该首先查看内容元素 .list-content 的元素高度/宽度是否大于容器元素 .wrapper 的高度/宽度。这是内容能够滚动的前提条件。如果内容存在图片的情况，可能会出现 DOM 元素渲染时图片还未下载，因此内容元素的高度小于预期，出现滚动不正常的情况。此时你应该在图片加载完成后，比如 onload 事件回调中，手动调用 vue-better-scroll 组件的 refresh() 方法，它会重新计算滚动距离。
+
+# Use Setup
+
+### Install react-better-scroll
+
+```javascript
+yarn add react-better-scroll
+// or
+npm install react-better-scroll -s
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+### Use in SPA
 
-Then run the example inside another:
+1. 简单滚动
 
-```bash
-cd example
-npm i # or yarn to install dependencies
-npm start # or yarn start
+```tsx
+import BetterScrollList from '../../../components/BetterScrollList/index';
+import { useRef } from 'react';
+import styles from './index.less';
+const BetterScrollPage = () => {
+  const bsListInstance = useRef(null);
+
+  const onPullingUp = () => {};
+
+  const onPullingDown = () => {};
+  return (
+    <div className={styles.container}>
+      <div className={styles['navbar']}>导航栏</div>
+      <BetterScrollList
+        bscrollListRef={bsListInstance}
+        scrollbar={{ fade: true }}
+        startY={0}
+        onPullingUp={onPullingUp}
+        onPullingDown={onPullingDown}
+      >
+        <ul>
+          {new Array(20).fill(1).map((item, index) => (
+            <li className={styles.item}>{index}</li>
+          ))}
+        </ul>
+      </BetterScrollList>
+    </div>
+  );
+};
+
+export default BetterScrollPage;
 ```
 
-The default example imports and live reloads whatever is in `/dist`, so if you are seeing an out of date component, make sure TSDX is running in watch mode like we recommend above. **No symlinking required**, we use [Parcel's aliasing](https://parceljs.org/module_resolution.html#aliases).
+```less
+//.index.less
 
-To do a one-off build, use `npm run build` or `yarn build`.
+.item {
+  height: 140px;
+  text-align: center;
+  background-color: rgba(216, 145, 117, 0.678);
+  border: 1px solid rgb(15, 235, 125);
+  line-height: 140px;
+  color: #eee;
+}
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
-To run tests, use `npm test` or `yarn test`.
-
-## Configuration
-
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
-
-### Jest
-
-Jest tests are set up to run with `npm test` or `yarn test`.
-
-### Bundle analysis
-
-Calculates the real cost of your library using [size-limit](https://github.com/ai/size-limit) with `npm run size` and visulize it with `npm run analyze`.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
-
-```txt
-/example
-  index.html
-  index.tsx       # test your component here in a demo app
-  package.json
-  tsconfig.json
-/src
-  index.tsx       # EDIT THIS
-/test
-  blah.test.tsx   # EDIT THIS
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
-```
-
-#### React Testing Library
-
-We do not set up `react-testing-library` for you yet, we welcome contributions and documentation on this.
-
-### Rollup
-
-TSDX uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
-
-### TypeScript
-
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
-
-## Continuous Integration
-
-### GitHub Actions
-
-Two actions are added by default:
-
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
-
-## Optimizations
-
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
-
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
-
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
+.navbar {
+  padding: 20px;
+  text-align: center;
+  font-size: 24px;
 }
 ```
 
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
+2.异步数据滚动
 
-## Module Formats
+```tsx
+import BetterScrollList from '../../../components/BetterScrollList/index';
+import { useEffect, useRef, useState } from 'react';
+import styles from './index.less';
 
-CJS, ESModules, and UMD module formats are supported.
+const BetterScrollPage = () => {
+  const bsListInstance = useRef(null);
+  const count = useRef(0);
+  const [items, setItems] = useState([]);
+  useEffect(() => {
+    onPullingDown();
+    return () => {};
+  }, []);
 
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
+  const onPullingUp = () => {
+    // 模拟上拉 加载更多数据
+    console.log('上拉加载');
+    getData().then((res) => {
+      setItems((prev) => prev.concat(res));
+      //  this.items = this.items.concat(res)
+      if (count.current < 30) {
+        bsListInstance.current.forceUpdate(true);
+      } else {
+        bsListInstance.current.forceUpdate(false);
+      }
+    });
+  };
 
-## Deploying the Example Playground
+  const onPullingDown = () => {
+    // 模拟下拉刷新
+    console.log('下拉刷新');
 
-The Playground is just a simple [Parcel](https://parceljs.org) app, you can deploy it anywhere you would normally deploy that. Here are some guidelines for **manually** deploying with the Netlify CLI (`npm i -g netlify-cli`):
+    getData().then((res) => {
+      setItems(res as []);
+      bsListInstance.current.forceUpdate(true);
+    });
+  };
+  // 模拟数据请求
+  const getData = () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const arr = [];
+        for (let i = 0; i < 10; i++) {
+          arr.push(count.current++);
+        }
+        resolve(arr);
+      }, 1000);
+    });
+  };
+  return (
+    <div className={styles.container}>
+      <div className={styles['navbar']}>导航栏</div>
+      <BetterScrollList
+        bscrollListRef={bsListInstance}
+        scrollbar={{ fade: true }}
+        pullDownRefresh={{
+          threshold: 90,
+          stop: 40,
+        }}
+        pullUpLoad={{
+          threshold: 0,
+          txt: {
+            more: '加载更多',
+            noMore: '没有更多数据了',
+          },
+        }}
+        startY={0}
+        onPullingUp={onPullingUp}
+        onPullingDown={onPullingDown}
+      >
+        <ul>
+          {items.map((item, index) => (
+            <li className={styles.item}>{index}</li>
+          ))}
+        </ul>
+      </BetterScrollList>
+    </div>
+  );
+};
 
-```bash
-cd example # if not already in the example folder
-npm run build # builds to dist
-netlify deploy # deploy the dist folder
+export default BetterScrollPage;
 ```
 
-Alternatively, if you already have a git repo connected, you can set up continuous deployment with Netlify:
+```less
+.item {
+  height: 140px;
+  text-align: center;
+  background-color: rgba(216, 145, 117, 0.678);
+  border: 1px solid rgb(15, 235, 125);
+  line-height: 140px;
+  color: #eee;
+}
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
-```bash
-netlify init
-# build command: yarn build && cd example && yarn && yarn build
-# directory to deploy: example/dist
-# pick yes for netlify.toml
+.navbar {
+  padding: 20px;
+  text-align: center;
+  font-size: 24px;
+}
 ```
 
-## Named Exports
+**注意：使用时要给予 container 你期望的高度，否则会导致无法滚动，因为我这里 html body 等父级容器都是 100%，故直接设置 100%**
 
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
+### Attributes:
 
-## Including Styles
+| 参数               | 说明                                                                                                                                                               | 类型              | 可选值                                                                | 默认值 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- | --------------------------------------------------------------------- | ------ |
+| probeType          | 派发 scroll 事件的条件                                                                                                                                             | Number            | 1、2、3                                                               | 1      |
+| click              | better-scroll 会派发一个 click 事件                                                                                                                                | Boolean           |                                                                       | true   |
+| listenScroll       | 是否监听滚动，开启后才能派发 scroll 事件                                                                                                                           | Boolean           |                                                                       | false  |
+| listenBeforeScroll | 是否监听滚动之前，开启后才能派发 before-scroll-start 事件                                                                                                          | Boolean           |                                                                       | false  |
+| scrollbar          | 这个配置可以开启滚动条。当设置为 true 或者是一个 Object 的时候，都会开启滚动条，默认是会 fade 的                                                                   | Boolean or Object | {fade: true},                                                         | false  |
+| pullDownRefresh    | 这个配置用于做下拉刷新功能。当设置为 true 或者是一个 Object 的时候，可以开启下拉刷新，可以配置顶部下拉的距离（threshold） 来决定刷新时机以及回弹停留的距离（stop） | Boolean or Object | {threshold: 90,stop: 40},                                             | false  |
+| pullUpLoad         | 这个配置用于做上拉加载功能。当设置为 true 或者是一个 Object 的时候，可以开启上拉加载，可以配置离底部距离阈值（threshold）来决定开始加载的时机                      | Boolean or Object | { threshold: 0, txt: { more: '加载更多',noMore:'没有更多数据了'} }    | false  |
+| startY             | 纵轴方向初始化位置                                                                                                                                                 | Number            |                                                                       | 0      |
+| freeScroll         | 有些场景我们需要支持横向和纵向同时滚动，而不仅限制在某个方向，这个时候我们只要设置 freeScroll 为 true 即可                                                         | Boolean           |                                                                       | false  |
+| options            | 可自行根据 better-scroll 官方文档 扩展参数 例：`:options="{stopPropagation:true}"`                                                                                 | Object            | 官方文档的所有参数（注：props 传入的相同的属性会覆盖 options 传入的） | {}     |
 
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
+### 自定义 react element:
 
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
+| name     | 说明               |
+| -------- | ------------------ |
+| children | 滚动的主体内容区域 |
+| pulldown | 下拉刷新的内容     |
+| pullup   | 上拉加载的内容     |
 
-## Publishing to NPM
+### Methods:
 
-We recommend using [np](https://github.com/sindresorhus/np).
+| 方法名          | 说明                                                                                                                | 参数                                                                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| initScroll      | 初始化 scroll 组件                                                                                                  |                                                                                                                                                                                           |
+| disable         | 禁用 better-scroll，DOM 事件（如 touchstart、touchmove、touchend）的回调函数不再响应                                |                                                                                                                                                                                           |
+| enable          | 启用 better-scroll, 默认 开启                                                                                       |                                                                                                                                                                                           |
+| refresh         | 重新计算 better-scroll，当 DOM 结构发生变化的时候务必要调用确保滚动的效果正常（当页面无法滚动时，可尝试调用此方法） |                                                                                                                                                                                           |
+| scrollTo        | 滚动到指定的位置                                                                                                    | (scrollToX, scrollToY, scrollToTime, easing)接收 4 个参数，1.x 横轴坐标(px) 2.y 纵轴坐标(px) 3.滚动动画执行的时长(ms) 4.easing 缓动函数，一般不建议修改                                   |
+| scrollToElement | 滚动到指定的目标元素                                                                                                | (el, time, offsetX , offsetY )接收 4 个参数 详情请查看: [scrollToElement](https://ustbhuangyi.github.io/better-scroll/doc/zh-hans/api.html#scrolltoelementel-time-offsetx-offsety-easing) |
+| destroy         | 销毁 better-scroll，解绑事件                                                                                        |
+| **forceUpdate** | 数据跟新后强制更新页面                                                                                              | (dirty)接收 1 个 boolean 类型的参数，如果参数为 true，说明还可以触发下拉或者上拉事件，若参数为 false 表示之后不可拉动，一般用于数据加载全部了                                             |
 
-## Usage with Lerna
+### Events:
 
-When creating a new package with TSDX within a project set up with Lerna, you might encounter a `Cannot resolve dependency` error when trying to run the `example` project. To fix that you will need to make changes to the `package.json` file _inside the `example` directory_.
+| 事件名称            | 说明                                                                                                                       | 回调参数                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| scroll              | 触发时机：滚动过程中，具体时机取决于选项中的 probeType (触发事件在参数中需要开启 **listenScroll** )                        | 共 1 个参数,类型 Object, {x, y} 滚动的实时坐标 |
+| before-scroll-start | 触发时机：滚动开始之前 (触发事件在参数中需要开启 **listenBeforeScroll** )                                                  | 无                                             |
+| pulling-down        | 触发时机：在一次下拉刷新的动作后，这个时机一般用来去后端请求数据。(触发事件在参数中需要开启 **pullDownRefresh** 相关配置 ) | 无                                             |
+| pullin-up           | 触发时机：在一次上拉加载的动作后，这个时机一般用来去后端请求数据。(触发事件在参数中需要开启 **pullingUp** 相关配置 )       | 无                                             |
 
-The problem is that due to the nature of how dependencies are installed in Lerna projects, the aliases in the example project's `package.json` might not point to the right place, as those dependencies might have been installed in the root of your Lerna project.
+---
 
-Change the `alias` to point to where those packages are actually installed. This depends on the directory structure of your Lerna project, so the actual path might be different from the diff below.
+> 目前只提供了以上常用方法、Api,如有额外需要请 issue
 
-```diff
-   "alias": {
--    "react": "../node_modules/react",
--    "react-dom": "../node_modules/react-dom"
-+    "react": "../../../node_modules/react",
-+    "react-dom": "../../../node_modules/react-dom"
-   },
-```
+# More detailed settings, please visit
 
-An alternative to fixing this problem would be to remove aliases altogether and define the dependencies referenced as aliases as dev dependencies instead. [However, that might cause other problems.](https://github.com/palmerhq/tsdx/issues/64)
+[better-scroll document](https://ustbhuangyi.github.io/better-scroll/doc/)
+
+# Author Blog
+
+[不要温和地走进那良夜](https://zoyopo.github.io/)
