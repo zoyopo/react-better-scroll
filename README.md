@@ -1,8 +1,8 @@
 # [react-better-scroll](https://github.com/zoyopo/react-better-scroll)
 
-> A vue plugins based on [better-scroll](https://github.com/ustbhuangyi/better-scroll)
+> A react Component based on [better-scroll](https://github.com/ustbhuangyi/better-scroll)
 
-> 最近写移动端项目，下拉刷新、上拉加载的场景很常见，发现 [mint-ui](https://github.com/ElemeFE/mint-ui) 的 Loadmore 组件效果体验不尽如人意， [Vux](https://github.com/airyland/vux) 的 Scroller 组件作者不推荐使用也停止维护了，最后决定根据 better-scroll 封装成自己的 vue 组件，作者也提供了详细的教程。
+> 最近很多前端小伙伴被移动端的滚动所困扰，原生滚动 bug 颇多，于是对 better-scroll 进行 react 化改造，希望能有所帮助。
 
 # Example
 
