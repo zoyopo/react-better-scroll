@@ -41400,7 +41400,7 @@ exports.Indicators = Indicators;
 BScroll.use(MouseWheel).use(ObserveDOM).use(PullDown).use(PullUp).use(ScrollBar).use(Slide).use(Wheel).use(Zoom).use(NestedScroll).use(InfinityScroll).use(Movable).use(ObserveImage).use(Indicators);
 var _default = BScroll;
 exports.default = _default;
-},{}],"../dist/react-better-scroll.cjs.development.js":[function(require,module,exports) {
+},{}],"../dist/react-with-better-scroll.cjs.development.js":[function(require,module,exports) {
 'use strict';
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -41966,11 +41966,11 @@ exports.BetterScrollList = BetterScrollList;
 'use strict';
 
 if ("development" === 'production') {
-  module.exports = require('./react-better-scroll.cjs.production.min.js');
+  module.exports = require('./react-with-better-scroll.cjs.production.min.js');
 } else {
-  module.exports = require('./react-better-scroll.cjs.development.js');
+  module.exports = require('./react-with-better-scroll.cjs.development.js');
 }
-},{"./react-better-scroll.cjs.development.js":"../dist/react-better-scroll.cjs.development.js"}],"node_modules/parcel/src/builtins/bundle-url.js":[function(require,module,exports) {
+},{"./react-with-better-scroll.cjs.development.js":"../dist/react-with-better-scroll.cjs.development.js"}],"node_modules/parcel/src/builtins/bundle-url.js":[function(require,module,exports) {
 var bundleURL = null;
 
 function getBundleURLCached() {
@@ -42234,8 +42234,13 @@ var UseHistorySubscribe = function UseHistorySubscribe(props) {
   }
 
   history.replaceState = wrapState("replaceState");
+  history.pushState = wrapState("pushState");
   window.addEventListener("replaceState", function (e) {
     console.info("replaceState", e.stateInfo);
+    cb && cb();
+  });
+  window.addEventListener("pushState", function (e) {
+    console.info("pushState", e.stateInfo);
     cb && cb();
   });
   return {
@@ -42347,9 +42352,10 @@ var App = function App() {
 
   var navigateTo = function navigateTo(name) {
     return function () {
-      window.history.replaceState({
+      var prefix = window.location.href.split('?')[0];
+      window.history.pushState({
         target: name
-      }, "", window.location.protocol + "//" + window.location.host + "?demoType=" + name);
+      }, "", prefix + "?demoType=" + name);
     };
   };
 
@@ -42401,7 +42407,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "12066" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "4451" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -31,7 +31,8 @@ const App = () => {
 
 
 const navigateTo = (name) => () =>{
-  window.history.replaceState({target:name},"",`${window.location.protocol}//${window.location.host}?demoType=${name}`)
+  const prefix = window.location.href.split('?')[0]
+  window.history.pushState({target:name},"",`${prefix}?demoType=${name}`)
 }
 const renderDemoOption = () =>{
   return <> <div className="option-btn" onClick={navigateTo(DemoType.simple)}>simple</div>

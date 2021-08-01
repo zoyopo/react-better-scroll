@@ -37,10 +37,17 @@ function wrapState(action) {
   }
 }
 history.replaceState = wrapState("replaceState");
+history.pushState = wrapState("pushState");
+
 window.addEventListener("replaceState", function (e) {
   console.info("replaceState",e.stateInfo);
   cb && cb()
 })
+window.addEventListener("pushState", function (e) {
+  console.info("pushState",e.stateInfo);
+  cb && cb()
+})
+
 
 return {getParameterByName}
 }
