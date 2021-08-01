@@ -54,6 +54,7 @@ export default BetterScrollPage;
 ```
 
 ```css
+// index.css
 ul {
   margin: 0;
   padding: 0;
@@ -193,6 +194,7 @@ export default BetterScrollPage;
 ```
 
 ```css
+// index.css
 ul {
   margin: 0;
   padding: 0;
