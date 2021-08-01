@@ -41628,10 +41628,7 @@ var BetterScrollList = function BetterScrollList(props) {
       _props$pullUpLoad = props.pullUpLoad,
       pullUpLoad = _props$pullUpLoad === void 0 ? false : _props$pullUpLoad,
       _props$pullDownRefres = props.pullDownRefresh,
-      pullDownRefresh = _props$pullDownRefres === void 0 ? {
-    txt: '刷新成功',
-    stopTime: 600
-  } : _props$pullDownRefres,
+      pullDownRefresh = _props$pullDownRefres === void 0 ? false : _props$pullDownRefres,
       _props$options = props.options,
       options = _props$options === void 0 ? {} : _props$options,
       _props$probeType = props.probeType,

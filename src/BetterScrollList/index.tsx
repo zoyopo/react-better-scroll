@@ -98,7 +98,7 @@ const BetterScrollList = (props: Iprops) => {
     PullUpElement,
     PullDownElement,
     pullUpLoad = false,
-    pullDownRefresh = {txt:'刷新成功',stopTime:600},
+    pullDownRefresh = false,
     options = {},
     probeType = 1,
     listenScroll = false,
@@ -304,7 +304,7 @@ const BetterScrollList = (props: Iprops) => {
    
   }
   const _reboundPullDown = () => {
-    const { stopTime = 600 } = pullDownRefresh
+    const { stopTime = 600 } = pullDownRefresh as pullDownRefreshObj
     return new Promise((resolve) => {
       reboundPullDownTimerRef.current = setTimeout(() => {
         isRebounding.current = true
