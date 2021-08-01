@@ -10,6 +10,10 @@
   "engines": {
     "node": ">=10"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zoyopo/react-better-scroll.git"
+  },
   "keywords": [
     "better-scroll",
     "react-better-scroll",
@@ -40,7 +44,7 @@
     "trailingComma": "es5"
   },
   "name": "react-with-better-scroll",
-  "author": "zhangyunpeng",
+  "author": "zhangyunpeng<694534942@qq.com>",
   "module": "dist/react-better-scroll.esm.js",
   "size-limit": [
     {
@@ -51,7 +55,7 @@
       "path": "dist/react-better-scroll.esm.js",
       "limit": "10 KB"
     }
-  ],
+  ], 
   "devDependencies": {
     "@size-limit/preset-small-lib": "^5.0.2",
     "@types/react": "^17.0.15",

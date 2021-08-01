@@ -53,8 +53,9 @@ const BetterScrollPage = () => {
 export default BetterScrollPage;
 ```
 
+index.css
+
 ```css
-// index.css
 ul {
   margin: 0;
   padding: 0;
@@ -193,8 +194,9 @@ const BetterScrollPage = () => {
 export default BetterScrollPage;
 ```
 
+index.css
+
 ```css
-// index.css
 ul {
   margin: 0;
   padding: 0;
