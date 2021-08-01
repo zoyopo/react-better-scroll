@@ -1,0 +1,15 @@
+.option-btn{
+   
+  
+   text-align: center;
+   padding: 3vw 0vw  3vw 0vw;
+   font-size: 6vw;
+   border: 1px solid #eee;
+   margin-top: 4vh;
+   background: linear-gradient(rgba(255, 17, 0, 0.863), rgb(255, 246, 192));
+   border-radius: 5px;
+   box-sizing: border-box;
+   margin-left: 1vw;
+   margin-right: 1vw;
+   color: #fff;
+}

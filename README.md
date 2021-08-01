@@ -31,28 +31,18 @@ npm install react-better-scroll -s
 1. 简单滚动
 
 ```tsx
-import BetterScrollList from '../../../components/BetterScrollList/index';
-import { useRef } from 'react';
-import styles from './index.less';
+import { BetterScrollList } from '../../../dist';
+import React = require('react');
+import './index.css';
+
 const BetterScrollPage = () => {
-  const bsListInstance = useRef(null);
-
-  const onPullingUp = () => {};
-
-  const onPullingDown = () => {};
   return (
-    <div className={styles.container}>
-      <div className={styles['navbar']}>导航栏</div>
-      <BetterScrollList
-        bscrollListRef={bsListInstance}
-        scrollbar={{ fade: true }}
-        startY={0}
-        onPullingUp={onPullingUp}
-        onPullingDown={onPullingDown}
-      >
+    <div className="container">
+      <div className="navbar">导航栏</div>
+      <BetterScrollList>
         <ul>
           {new Array(20).fill(1).map((item, index) => (
-            <li className={styles.item}>{index}</li>
+            <li className="item">{index}</li>
           ))}
         </ul>
       </BetterScrollList>
@@ -63,9 +53,19 @@ const BetterScrollPage = () => {
 export default BetterScrollPage;
 ```
 
-```less
-//.index.less
-
+```css
+ul {
+  margin: 0;
+  padding: 0;
+}
+body,
+html,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+}
 .item {
   height: 140px;
   text-align: center;
@@ -74,6 +74,10 @@ export default BetterScrollPage;
   line-height: 140px;
   color: #eee;
 }
+.item:not(:last-child) {
+  border-bottom: none;
+}
+
 .container {
   height: 100%;
   display: flex;
@@ -84,35 +88,51 @@ export default BetterScrollPage;
   padding: 20px;
   text-align: center;
   font-size: 24px;
+  background-color: rgba(204, 238, 228, 0.541);
 }
 ```
 
 2.异步数据滚动
 
 ```tsx
-import BetterScrollList from '../../../components/BetterScrollList/index';
+import { BetterScrollList } from '../../../dist';
 import { useEffect, useRef, useState } from 'react';
-import styles from './index.less';
+import React = require('react');
+import './index.css';
 
 const BetterScrollPage = () => {
-  const bsListInstance = useRef(null);
-  const count = useRef(0);
+  const bsListInstance = useRef<any>();
+  const pageNo = useRef(1);
+  const pageSize = useRef(10);
   const [items, setItems] = useState([]);
+
   useEffect(() => {
     onPullingDown();
     return () => {};
   }, []);
 
+  const getMockDataFromServer = () => {
+    const dataSource = new Array(45).fill(1);
+    return dataSource;
+  };
+  const getDataByPagination = pagaination => {
+    const { pageNo, pageSize } = pagaination;
+    const data = getMockDataFromServer();
+    return data.slice(pageSize * (pageNo - 1), pageSize * pageNo);
+  };
+
   const onPullingUp = () => {
     // 模拟上拉 加载更多数据
     console.log('上拉加载');
-    getData().then((res) => {
-      setItems((prev) => prev.concat(res));
+    getData().then((res: []) => {
+      console.log('res', res);
+      setItems(prev => prev.concat(res));
       //  this.items = this.items.concat(res)
-      if (count.current < 30) {
-        bsListInstance.current.forceUpdate(true);
-      } else {
+      if (res.length < 10) {
+        console.log('to end');
         bsListInstance.current.forceUpdate(false);
+      } else {
+        bsListInstance.current.forceUpdate(true);
       }
     });
   };
@@ -120,27 +140,28 @@ const BetterScrollPage = () => {
   const onPullingDown = () => {
     // 模拟下拉刷新
     console.log('下拉刷新');
-
-    getData().then((res) => {
+    pageNo.current = 1;
+    getData().then(res => {
       setItems(res as []);
       bsListInstance.current.forceUpdate(true);
     });
   };
   // 模拟数据请求
   const getData = () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
-        const arr = [];
-        for (let i = 0; i < 10; i++) {
-          arr.push(count.current++);
-        }
+        const arr: number[] = getDataByPagination({
+          pageNo: pageNo.current,
+          pageSize: pageSize.current,
+        });
+        pageNo.current++;
         resolve(arr);
       }, 1000);
     });
   };
   return (
-    <div className={styles.container}>
-      <div className={styles['navbar']}>导航栏</div>
+    <div className="container">
+      <div className="navbar">导航栏</div>
       <BetterScrollList
         bscrollListRef={bsListInstance}
         scrollbar={{ fade: true }}
@@ -155,13 +176,12 @@ const BetterScrollPage = () => {
             noMore: '没有更多数据了',
           },
         }}
-        startY={0}
         onPullingUp={onPullingUp}
         onPullingDown={onPullingDown}
       >
         <ul>
           {items.map((item, index) => (
-            <li className={styles.item}>{index}</li>
+            <li className="item">{index}</li>
           ))}
         </ul>
       </BetterScrollList>
@@ -172,7 +192,19 @@ const BetterScrollPage = () => {
 export default BetterScrollPage;
 ```
 
-```less
+```css
+ul {
+  margin: 0;
+  padding: 0;
+}
+body,
+html,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+}
 .item {
   height: 140px;
   text-align: center;
@@ -181,6 +213,10 @@ export default BetterScrollPage;
   line-height: 140px;
   color: #eee;
 }
+.item:not(:last-child) {
+  border-bottom: none;
+}
+
 .container {
   height: 100%;
   display: flex;
@@ -191,6 +227,7 @@ export default BetterScrollPage;
   padding: 20px;
   text-align: center;
   font-size: 24px;
+  background-color: rgba(204, 238, 228, 0.541);
 }
 ```
 
@@ -213,11 +250,11 @@ export default BetterScrollPage;
 
 ### 自定义 react element:
 
-| name     | 说明               |
-| -------- | ------------------ |
-| children | 滚动的主体内容区域 |
-| pulldown | 下拉刷新的内容     |
-| pullup   | 上拉加载的内容     |
+| name            | 说明                              | 注入属性                                                                                                |
+| --------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| children        | 滚动的主体内容区域组件            |                                                                                                         |
+| PullDownElement | 下拉刷新的组件函数 （注：非组件） | beforePullDown:boolean, // 在下拉之前 pulldownY:number,//下拉 y 轴距离 isPulling:boolean //是否正在下拉 |
+| PullUpElement   | 上拉刷新的组件函数 （注：非组件） | isPullUpLoad:boolean // 是否上拉加载                                                                    |
 
 ### Methods:
 
@@ -234,12 +271,12 @@ export default BetterScrollPage;
 
 ### Events:
 
-| 事件名称            | 说明                                                                                                                       | 回调参数                                       |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| scroll              | 触发时机：滚动过程中，具体时机取决于选项中的 probeType (触发事件在参数中需要开启 **listenScroll** )                        | 共 1 个参数,类型 Object, {x, y} 滚动的实时坐标 |
-| before-scroll-start | 触发时机：滚动开始之前 (触发事件在参数中需要开启 **listenBeforeScroll** )                                                  | 无                                             |
-| pulling-down        | 触发时机：在一次下拉刷新的动作后，这个时机一般用来去后端请求数据。(触发事件在参数中需要开启 **pullDownRefresh** 相关配置 ) | 无                                             |
-| pullin-up           | 触发时机：在一次上拉加载的动作后，这个时机一般用来去后端请求数据。(触发事件在参数中需要开启 **pullingUp** 相关配置 )       | 无                                             |
+| 事件名称          | 说明                                                                                                                       | 回调参数                                       |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| scroll            | 触发时机：滚动过程中，具体时机取决于选项中的 probeType (触发事件在参数中需要开启 **listenScroll** )                        | 共 1 个参数,类型 Object, {x, y} 滚动的实时坐标 |
+| beforeScrollStart | 触发时机：滚动开始之前 (触发事件在参数中需要开启 **listenBeforeScroll** )                                                  | 无                                             |
+| pullingDown       | 触发时机：在一次下拉刷新的动作后，这个时机一般用来去后端请求数据。(触发事件在参数中需要开启 **pullDownRefresh** 相关配置 ) | 无                                             |
+| pullinUp          | 触发时机：在一次上拉加载的动作后，这个时机一般用来去后端请求数据。(触发事件在参数中需要开启 **pullingUp** 相关配置 )       | 无                                             |
 
 ---
 
