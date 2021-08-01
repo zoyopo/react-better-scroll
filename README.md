@@ -1,6 +1,6 @@
 # [react-better-scroll](https://github.com/zoyopo/react-better-scroll)
 
-> A react Component based on [better-scroll](https://github.com/ustbhuangyi/better-scroll)
+> A react Component based on [better-scroll](https://github.com/ustbhuangyi/better-scroll) and inspired by [vue-better-scroll](https://github.com/huangjincq/vue-better-scroll)
 
 > 最近很多前端小伙伴被移动端的滚动所困扰，原生滚动 bug 颇多，于是对 better-scroll 进行 react 化改造，希望能有所帮助。
 
