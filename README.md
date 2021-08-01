@@ -21,9 +21,9 @@
 ### Install react-better-scroll
 
 ```javascript
-yarn add react-better-scroll
+yarn add react-with-better-scroll
 // or
-npm install react-better-scroll -s
+npm install react-with-better-scroll -s
 ```
 
 ### Use in SPA

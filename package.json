@@ -10,6 +10,12 @@
   "engines": {
     "node": ">=10"
   },
+  "keywords": [
+    "better-scroll",
+    "react-better-scroll",
+    "react-hooks",
+    "scroll"
+  ],
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
@@ -33,7 +39,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "react-better-scroll",
+  "name": "react-with-better-scroll",
   "author": "zhangyunpeng",
   "module": "dist/react-better-scroll.esm.js",
   "size-limit": [
