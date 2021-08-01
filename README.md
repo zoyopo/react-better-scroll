@@ -2,7 +2,26 @@
 
 > A react Component based on [better-scroll](https://github.com/ustbhuangyi/better-scroll) and inspired by [vue-better-scroll](https://github.com/huangjincq/vue-better-scroll)
 
-> 最近很多前端小伙伴被移动端的滚动所困扰，原生滚动 bug 颇多，于是对 better-scroll 进行 react 化改造，希望能有所帮助。
+> 最近我司很多前端小伙伴被移动端的滚动所困扰，原生滚动 bug 颇多，于是对 better-scroll 进行 react 化实现，希望能有所帮助。
+
+# 为什么选择 better-scroll
+
+1. css 动画滚动代替原生滚动，有效避免原生滚动的坑
+2. fancy 的滚动效果，更好的用户体验
+3. 丰富的事件/钩子体系，满足更多场景和需求
+4. 维护时间较久，版本较为稳定
+
+# 为什么使用 react 再次实现
+
+1. better-scroll 本身是个纯 js 库，技术栈无关
+2. 原本的命令式调用组件化，降低使用复杂
+3. 更友好的 react 使用路径
+4. 在组件中内聚一些符合场景需要的交互（比如上拉加载，下拉刷新），亦可复写
+
+# 下一步计划
+
+1. 更多场景扩展（增加易用性）
+2. 更友好的接口
 
 # Example
 
