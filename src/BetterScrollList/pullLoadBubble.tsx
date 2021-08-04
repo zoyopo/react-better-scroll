@@ -8,7 +8,15 @@ interface Iprops{
 const PullLoadBubble = (props:Iprops) =>{
   const {y = 0 ,bubbleRef } =props;
   const bubbleDomRef = useRef<any>()
-  const ratio = window.devicePixelRatio;
+  const isServer = () =>{
+    return typeof window === 'undefined'
+  }
+
+  const getDpr = () =>{
+    const dpr = isServer()?1:window.devicePixelRatio 
+    return dpr
+  }
+  const ratio = getDpr();
 
   const initRadius = 18 * ratio
   const minHeadRadius = 12 * ratio
@@ -136,14 +144,7 @@ const PullLoadBubble = (props:Iprops) =>{
   
   }
  
-  const isServer = () =>{
-    return typeof window === 'undefined'
-  }
 
-  const getDpr = () =>{
-    const dpr = isServer()?1:window.devicePixelRatio 
-    return dpr
-  }
 
   const getDistance = () => {
     return Math.max(0, Math.min(y * ratio, maxDistance))
