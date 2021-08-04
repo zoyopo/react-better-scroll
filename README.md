@@ -47,6 +47,10 @@ npm install react-with-better-scroll -s
 
 ### Use in SPA
 
+#### 使用注意
+
+因为内部滚动容器高度为 100%，继承`父容器高度`，使用时要给予 该组件 `父级容器` 你`期望的高度`，否则会导致无法滚动，因为我这里 html body 等父级容器都是 100%，故直接设置`.container{height:100%}`
+
 1. 简单滚动
 
 ```tsx
@@ -253,8 +257,6 @@ body {
   background-color: rgba(204, 238, 228, 0.541);
 }
 ```
-
-**注意：使用时要给予 container 你期望的高度，否则会导致无法滚动，因为我这里 html body 等父级容器都是 100%，故直接设置 100%**
 
 ### Attributes:
 
