@@ -1,5 +1,5 @@
 import { ReactElement, useState, CSSProperties, MutableRefObject, useImperativeHandle } from 'react'
-import BetterScroll from 'better-scroll'
+import BetterScroll ,{Options}from 'better-scroll'
 import { useRef, useEffect } from 'react'
 import React from 'react'
 import PullLoadBubble from './pullLoadBubble'
@@ -40,7 +40,7 @@ interface Iprops {
   PullDownElement?: React.FC<PullDownElementProps>
   pullUpLoad?: pullUpLoadObj
   pullDownRefresh?: pullDownRefreshObj
-  options?: object
+  options?: Options
   probeType?: number
   click?: boolean
   listenScroll?: boolean
@@ -149,22 +149,29 @@ const BetterScrollList = (props: Iprops) => {
       initScroll()
     }, 20)
   }, [])
+
+  const isPullDownEventEnable = () => {
+      return Boolean(onPullingDown)
+  }
+  const isPullUpEventEnable = () => {
+      return Boolean(onPullingUp)
+  }
   const initScroll = () => {
     const wrapperDom = wrapperRef.current
     if (!wrapperDom) {
       return
     }
-    const _options = Object.assign({}, options, {
+    const _options = Object.assign({}, {
       probeType: probeType,
       click: click,
       scrollY: true, // 下拉刷新组件 只能纵向 不能横向
       scrollX: false,
       scrollbar: scrollbar,
-      pullDownRefresh: pullDownRefresh,
-      pullUpLoad: pullUpLoad,
+      pullDownRefresh: pullDownRefresh || isPullDownEventEnable(),
+      pullUpLoad: pullUpLoad || isPullUpEventEnable(),
       startY: startY,
       freeScroll: freeScroll,
-    }) as Object
+    } ,options) as Object
     bscrollInstance.current = new BetterScroll(wrapperDom, _options)
     if (listenScroll) {
       bscrollInstance.current.on('scroll', (pos:any) => {
@@ -178,11 +185,11 @@ const BetterScrollList = (props: Iprops) => {
       })
     }
 
-    if (pullDownRefresh) {
+    if (pullDownRefresh || isPullDownEventEnable()) {
       _initPullDownRefresh()
     }
 
-    if (pullUpLoad) {
+    if (pullUpLoad || isPullUpEventEnable()) {
         _initPullUpLoad()
     }
   }
