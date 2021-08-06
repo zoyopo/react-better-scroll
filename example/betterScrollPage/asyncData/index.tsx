@@ -62,23 +62,22 @@ const BetterScrollPage = () => {
       }, 1000)
     })
   }
+
+  const PullDownComponent = (props)=>{
+       const {beforePullDown,isPulling,ref,isPullingDown} =props;
+       return<>{isPullingDown && <div style={{position:'absolute',top:30}} ref={ref} className="PullDownComponent">
+         {beforePullDown?<div>下拉加载</div>:<>{isPulling?<div>加载中</div>:<div>刷新成功</div>}</>}
+       </div>
+  }
+       </>
+  }
   return (
     <div className="container">
       <div className="navbar">导航栏</div>
       <BetterScrollList
         bscrollListRef={bsListInstance}
         scrollbar={{ fade: true }}
-        pullDownRefresh={{
-          threshold: 90,
-          stop: 40,
-        }}
-        pullUpLoad={{
-          threshold: 0,
-          txt: {
-            more: '加载更多',
-            noMore: '没有更多数据了',
-          },
-        }}
+        PullDownElement={PullDownComponent}
         onPullingUp={onPullingUp}
         onPullingDown={onPullingDown}
       >

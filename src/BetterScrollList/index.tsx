@@ -4,7 +4,7 @@ import { useRef, useEffect } from 'react'
 import React from 'react'
 import PullLoadBubble from './pullLoadBubble'
 type pullUpLoadObj = {
-  txt: {
+  txt?: {
     more: string
     noMore: string
   }
@@ -32,7 +32,8 @@ type PullUpElementProps ={
 type PullDownElementProps = {
   beforePullDown:boolean,
    pulldownY:number,
-   isPulling:boolean
+   isPulling:boolean,
+   isPullingDown:boolean
 }
 interface Iprops {
   children: ReactElement
@@ -115,11 +116,12 @@ const BetterScrollList = (props: Iprops) => {
   } = props
   const bubbleRef = useRef(null)
   const wrapperRef = useRef(null)
-  const pulldownWrapperRef =useRef(null)
+  const pulldownWrapperRef =useRef<any>()
   const reboundPullDownTimerRef = useRef<any>()
   const afterPullDownTimerRef = useRef<any>()
   // const [isPulling, setIsPulling] = useState(false)
   const [isPullUpToPageEnd,setIsPullUpToPageEnd] = useState(true)
+  
   const [pullInfo, setPullInfo] = useState<pullInfoType>({
     isPullUpLoad: false,
     isPulling: false,
@@ -141,10 +143,14 @@ const BetterScrollList = (props: Iprops) => {
       
     
     }
-    if(pulldownWrapperRef.current){
-      // @ts-ignore
-      pulldownWrapperRef.current.style.top =wrapper.offsetTop + 'px'
-    }
+    setTimeout(() => {
+      if(pulldownWrapperRef.current){
+        console.log('pulldownWrapperRef',pulldownWrapperRef)
+        // @ts-ignore
+        pulldownWrapperRef.current.style.top =wrapper.offsetTop + 'px'
+      } 
+    }, 200);
+
     setTimeout(() => {
       initScroll()
     }, 20)
@@ -201,24 +207,40 @@ const BetterScrollList = (props: Iprops) => {
         isPullingDown: true,
         isPulling: true,
       })
-
+      
       onPullingDown && onPullingDown()
     })
+      // v2.4.0 supported
+      scrollInstance.on('enterThreshold', () => {
+        setPullInfo(prev=>({...prev,isPullingDown:true}))
+        
+      })
+      scrollInstance.on('leaveThreshold', () => {
+        console.warn('leaveThreshold')
+      
+      
+      })
+      scrollInstance.on('fetching', () => {
+        console.warn('fetching')
+      })
+    if(pullDownRefresh||(isPullDownEventEnable())){
     scrollInstance.on('touchEnd', () => {
     
      setTimeout(() => {
         // @ts-ignore
       bubbleRef.current &&  bubbleRef.current.clearRect()
+     
      }, 100);
     
      scrollInstance.on('scrollEnd', () => {
       setTimeout(() => {
         // @ts-ignore
       bubbleRef.current &&  bubbleRef.current.clearRect()
+     
      }, 100);
      })
+     
     })
-
     scrollInstance.on('scroll', (pos:any) => {
       if (pullInfo.beforePullDown) {
         setBubbleY(Math.max(0, pos.y + pullInfo.pullDownInitTop))
@@ -241,6 +263,8 @@ const BetterScrollList = (props: Iprops) => {
         }))
       }
     })
+  }
+
   }
   const _initPullUpLoad = () => {
     const scrollInstance = bscrollInstance.current
@@ -296,7 +320,7 @@ const BetterScrollList = (props: Iprops) => {
   
       console.log('setIsPullUpToPageEnd',dirty)
       setIsPullUpToPageEnd(dirty)
-      if (pullDownRefresh && pullInfo.isPullingDown) {
+      if ((pullDownRefresh||isPullDownEventEnable()) && pullInfo.isPullingDown) {
         setPullInfo((prev) => ({ ...prev, isPulling: false }))
         _reboundPullDown().then(() => {
           _afterPullDown()
@@ -411,7 +435,7 @@ const BetterScrollList = (props: Iprops) => {
        
         {PullUpElement ?<PullUpElement isPullUpLoad={pullInfo.isPullUpLoad as boolean}/>:renderDefaultPullUpElement()}
       </div>
-       {PullDownElement?<PullDownElement pulldownY ={bubbleY} beforePullDown={pullInfo.beforePullDown} isPulling={pullInfo.isPulling}/>:renderDefaultPullDownElement()}
+       {PullDownElement?<PullDownElement isPullingDown={pullInfo.isPullingDown} pulldownY ={bubbleY} beforePullDown={pullInfo.beforePullDown} isPulling={pullInfo.isPulling}/>:renderDefaultPullDownElement()}
     </div>
   )
 }
