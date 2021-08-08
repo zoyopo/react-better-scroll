@@ -53,7 +53,7 @@ npm install react-with-better-scroll -s
 
 1. 简单滚动
 
-   ![async](/example/image/simple.gif)
+   ![async](https://github.com/zoyopo/react-better-scroll/blob/master/example/image/simple.gif)
 
 ```tsx
 import { BetterScrollList } from '../../../dist';
@@ -121,7 +121,7 @@ body {
 
 2. 异步数据滚动
 
-![async](/example/image/async.gif)
+![async](https://github.com/zoyopo/react-better-scroll/blob/master/example/image/async.gif)
 
 ```tsx
 import { BetterScrollList } from '../../../dist';
@@ -264,7 +264,7 @@ body {
 
 3. 异步下拉刷新组件自定义
 
-![examplePulldown](/example/image/exampleCustomPulldown.gif)
+![examplePulldown](https://github.com/zoyopo/react-better-scroll/blob/master/example/image/exampleCustomPulldown.gif)
 
 ```tsx
 const PullDownComponent = props => {
