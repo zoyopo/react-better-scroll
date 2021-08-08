@@ -53,6 +53,8 @@ npm install react-with-better-scroll -s
 
 1. 简单滚动
 
+   ![async](/example/image/simple.gif)
+
 ```tsx
 import { BetterScrollList } from '../../../dist';
 import React = require('react');
@@ -117,7 +119,9 @@ body {
 }
 ```
 
-2.异步数据滚动
+2. 异步数据滚动
+
+![async](/example/image/async.gif)
 
 ```tsx
 import { BetterScrollList } from '../../../dist';
@@ -258,6 +262,48 @@ body {
 }
 ```
 
+3. 异步下拉刷新组件自定义
+
+![examplePulldown](/example/image/exampleCustomPulldown.gif)
+
+```tsx
+const PullDownComponent = props => {
+  const { beforePullDown, isPulling, reachRefreshRegion } = props;
+
+  return (
+    <div className="PullDownComponent">
+      {beforePullDown ? (
+        reachRefreshRegion ? (
+          <div>松开加载</div>
+        ) : (
+          <div>下拉加载</div>
+        )
+      ) : (
+        <>{isPulling ? <div>加载中</div> : <div>刷新成功</div>}</>
+      )}
+    </div>
+  );
+};
+return (
+  <div className="container">
+    <div className="navbar">导航栏</div>
+    <BetterScrollList
+      bscrollListRef={bsListInstance}
+      scrollbar={{ fade: true }}
+      PullDownElement={PullDownComponent}
+      onPullingUp={onPullingUp}
+      onPullingDown={onPullingDown}
+    >
+      <ul>
+        {items.map((item, index) => (
+          <li className="item">{index}</li>
+        ))}
+      </ul>
+    </BetterScrollList>
+  </div>
+);
+```
+
 ### Attributes:
 
 | 参数               | 说明                                                                                                                                                               | 类型              | 可选值                                                                | 默认值 |
@@ -275,11 +321,11 @@ body {
 
 ### 自定义 react element:
 
-| name            | 说明                              | 注入属性                                                                                                |
-| --------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| children        | 滚动的主体内容区域组件            |                                                                                                         |
-| PullDownElement | 下拉刷新的组件函数 （注：非组件） | beforePullDown:boolean, // 在下拉之前 pulldownY:number,//下拉 y 轴距离 isPulling:boolean //是否正在下拉 |
-| PullUpElement   | 上拉刷新的组件函数 （注：非组件） | isPullUpLoad:boolean // 是否上拉加载                                                                    |
+| name            | 说明                              | 注入属性                                                                                                                                         |
+| --------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| children        | 滚动的主体内容区域组件            |                                                                                                                                                  |
+| PullDownElement | 下拉刷新的组件函数 （注：非组件） | reachRefreshRegion // 是否触及刷新阈值， beforePullDown:boolean, // 在下拉之前 pulldownY:number,//下拉 y 轴距离 isPulling:boolean //是否正在下拉 |
+| PullUpElement   | 上拉刷新的组件函数 （注：非组件） | isPullUpLoad:boolean // 是否上拉加载                                                                                                             |
 
 ### Methods:
 

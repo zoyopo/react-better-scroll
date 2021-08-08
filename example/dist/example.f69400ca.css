@@ -68,6 +68,47 @@ body{
   font-size: 24px;
   background-color: rgba(204, 238, 228, 0.541);
 }
+
+ul{
+  margin: 0;
+  padding: 0
+}
+body,html,#root{
+  height: 100%;
+}
+body{
+  margin: 0;
+}
+.item{
+  height: 140px;
+  text-align: center;
+  background-color: rgba(216, 145, 117, 0.678);
+  border: 1px solid rgb(15, 235, 125);
+  line-height: 140px;
+  color: #eee;
+ 
+}
+.item:not(:last-child){
+  border-bottom: none;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  padding: 20px;
+  text-align: center;
+  font-size: 24px;
+  background-color: rgba(204, 238, 228, 0.541);
+}
+.PullDownComponent{
+  transform: translateY(-100%) translateZ(0) translateX(-50%);
+  position: absolute;
+  left: 50%;
+}
 .option-btn{
    
   

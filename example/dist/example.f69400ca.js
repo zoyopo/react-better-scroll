@@ -41442,7 +41442,17 @@ var PullLoadBubble = function PullLoadBubble(props) {
       y = _props$y === void 0 ? 0 : _props$y,
       bubbleRef = props.bubbleRef;
   var bubbleDomRef = React.useRef();
-  var ratio = window.devicePixelRatio;
+
+  var isServer = function isServer() {
+    return typeof window === 'undefined';
+  };
+
+  var getDpr = function getDpr() {
+    var dpr = isServer() ? 1 : window.devicePixelRatio;
+    return dpr;
+  };
+
+  var ratio = getDpr();
   var initRadius = 18 * ratio;
   var minHeadRadius = 12 * ratio;
   var minTailRadius = 5 * ratio;
@@ -41558,15 +41568,6 @@ var PullLoadBubble = function PullLoadBubble(props) {
     ctx.restore();
   };
 
-  var isServer = function isServer() {
-    return typeof window === 'undefined';
-  };
-
-  var getDpr = function getDpr() {
-    var dpr = isServer() ? 1 : window.devicePixelRatio;
-    return dpr;
-  };
-
   var getDistance = function getDistance() {
     return Math.max(0, Math.min(y * ratio, maxDistance));
   };
@@ -41587,30 +41588,26 @@ var PullLoadBubble = function PullLoadBubble(props) {
 };
 
 var style = {
-  "better-scroll__wrapper": {
+  'better-scroll__wrapper': {
     height: '100%',
     width: '100%',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    position: 'relative'
   },
-  "scroll-loading": {
+  'scroll-loading': {
     width: '20px',
     height: '20px'
   },
-  "pulldown-wrapper": {
+  'pulldown-wrapper': {
     position: 'absolute',
-    width: '100%',
-    left: 0,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    transition: 'all',
+    left: '50%',
     // @ts-ignore
-    top: 0
+    transform: 'translateY(-100%) translateZ(0) translateX(-50%)'
   },
-  "after-trigger": {
+  'after-trigger': {
     marginTop: '10px'
   },
-  "pullup-wrapper": {
+  'pullup-wrapper': {
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
@@ -41650,7 +41647,7 @@ var BetterScrollList = function BetterScrollList(props) {
       bscrollListRef = props.bscrollListRef;
   var bubbleRef = React.useRef(null);
   var wrapperRef = React.useRef(null);
-  var pulldownWrapperRef = React.useRef(null);
+  var pulldownWrapperRef = React.useRef();
   var reboundPullDownTimerRef = React.useRef();
   var afterPullDownTimerRef = React.useRef(); // const [isPulling, setIsPulling] = useState(false)
 
@@ -41664,7 +41661,8 @@ var BetterScrollList = function BetterScrollList(props) {
     isPullingDown: false,
     beforePullDown: true,
     pullDownStyle: {},
-    pullDownInitTop: -50
+    pullDownInitTop: -50,
+    reachRefreshRegion: false
   }),
       pullInfo = _useState2[0],
       setPullInfo = _useState2[1];
@@ -41676,22 +41674,18 @@ var BetterScrollList = function BetterScrollList(props) {
   var isRebounding = React.useRef(false);
   var bscrollInstance = React.useRef();
   React.useEffect(function () {
-    var wrapper = wrapperRef.current;
-
-    if (wrapper) {
-      // @ts-ignore
-      wrapper.firstElementChild.firstElementChild.style.minHeight = wrapper.offsetHeight + 'px';
-    }
-
-    if (pulldownWrapperRef.current) {
-      // @ts-ignore
-      pulldownWrapperRef.current.style.top = wrapper.offsetTop + 'px';
-    }
-
     setTimeout(function () {
       initScroll();
     }, 20);
   }, []);
+
+  var isPullDownEventEnable = function isPullDownEventEnable() {
+    return Boolean(onPullingDown);
+  };
+
+  var isPullUpEventEnable = function isPullUpEventEnable() {
+    return Boolean(onPullingUp);
+  };
 
   var initScroll = function initScroll() {
     var wrapperDom = wrapperRef.current;
@@ -41700,17 +41694,17 @@ var BetterScrollList = function BetterScrollList(props) {
       return;
     }
 
-    var _options = Object.assign({}, options, {
+    var _options = Object.assign({}, {
       probeType: probeType,
       click: click,
       scrollY: true,
       scrollX: false,
       scrollbar: scrollbar,
-      pullDownRefresh: pullDownRefresh,
-      pullUpLoad: pullUpLoad,
+      pullDownRefresh: pullDownRefresh || isPullDownEventEnable(),
+      pullUpLoad: pullUpLoad || isPullUpEventEnable(),
       startY: startY,
       freeScroll: freeScroll
-    });
+    }, options);
 
     bscrollInstance.current = new BetterScroll(wrapperDom, _options);
 
@@ -41726,11 +41720,11 @@ var BetterScrollList = function BetterScrollList(props) {
       });
     }
 
-    if (pullDownRefresh) {
+    if (pullDownRefresh || isPullDownEventEnable()) {
       _initPullDownRefresh();
     }
 
-    if (pullUpLoad) {
+    if (pullUpLoad || isPullUpEventEnable()) {
       _initPullUpLoad();
     }
   };
@@ -41738,59 +41732,69 @@ var BetterScrollList = function BetterScrollList(props) {
   var _initPullDownRefresh = function _initPullDownRefresh() {
     var scrollInstance = bscrollInstance.current;
     scrollInstance.on('pullingDown', function () {
-      setPullInfo({
-        beforePullDown: false,
-        isPullingDown: true,
-        isPulling: true
+      setPullInfo(function (prev) {
+        return _extends({}, prev, {
+          beforePullDown: false,
+          isPullingDown: true,
+          isPulling: true
+        });
       });
       onPullingDown && onPullingDown();
     });
-    scrollInstance.on('touchEnd', function () {
-      setTimeout(function () {
-        // @ts-ignore
-        bubbleRef.current && bubbleRef.current.clearRect();
-      }, 100);
-      scrollInstance.on('scrollEnd', function () {
+    scrollInstance.on('leaveThreshold', function () {
+      setPullInfo(function (prev) {
+        return _extends({}, prev, {
+          reachRefreshRegion: true
+        });
+      });
+    });
+
+    if (pullDownRefresh || isPullDownEventEnable()) {
+      scrollInstance.on('touchEnd', function () {
         setTimeout(function () {
           // @ts-ignore
           bubbleRef.current && bubbleRef.current.clearRect();
         }, 100);
-      });
-    });
-    scrollInstance.on('scroll', function (pos) {
-      if (pullInfo.beforePullDown) {
-        setBubbleY(Math.max(0, pos.y + pullInfo.pullDownInitTop)); //  this.pullDownStyle = `top:${Math.min(pos.y + this.pullDownInitTop, 10)}px`
-
-        setPullInfo(function (prev) {
-          return _extends({
-            pullDownStyle: {
-              top: Math.min(pos.y + pullInfo.pullDownInitTop, 10) + "px"
-            }
-          }, prev);
-        });
-        console.log('beforePullDown');
-      } else {
-        setBubbleY(0);
-      }
-
-      if (isRebounding.current) {
-        setPullInfo(function (prev) {
-          return _extends({
+        scrollInstance.on('scrollEnd', function () {
+          setTimeout(function () {
             // @ts-ignore
-            pullDownStyle: {
-              top: 10 - (pullDownRefresh.stop - pos.y) + "px"
-            }
-          }, prev);
+            bubbleRef.current && bubbleRef.current.clearRect();
+          }, 100);
         });
-      }
-    });
+      });
+      scrollInstance.on('scroll', function (pos) {
+        if (pullInfo.beforePullDown) {
+          setBubbleY(Math.max(0, pos.y + pullInfo.pullDownInitTop)); //  this.pullDownStyle = `top:${Math.min(pos.y + this.pullDownInitTop, 10)}px`
+
+          setPullInfo(function (prev) {
+            return _extends({
+              pullDownStyle: {
+                top: Math.min(pos.y + pullInfo.pullDownInitTop, 10) + "px"
+              }
+            }, prev);
+          });
+        } else {
+          setBubbleY(0);
+        }
+
+        if (isRebounding.current) {
+          setPullInfo(function (prev) {
+            return _extends({
+              // @ts-ignore
+              pullDownStyle: {
+                top: 10 - (pullDownRefresh.stop - pos.y) + "px"
+              }
+            }, prev);
+          });
+        }
+      });
+    }
   };
 
   var _initPullUpLoad = function _initPullUpLoad() {
     var scrollInstance = bscrollInstance.current;
     scrollInstance.on('pullingUp', function () {
       if (isPullUpToPageEnd) {
-        console.log('set isPullUpToPageEnd', 'true');
         setPullInfo(function (prev) {
           return _extends({}, prev, {
             isPullUpLoad: true
@@ -41838,20 +41842,20 @@ var BetterScrollList = function BetterScrollList(props) {
 
 
   var _forceUpdate = function _forceUpdate(dirty) {
-    console.log('setIsPullUpToPageEnd', dirty);
     setIsPullUpToPageEnd(dirty);
 
-    if (pullDownRefresh && pullInfo.isPullingDown) {
+    if ((pullDownRefresh || isPullDownEventEnable()) && pullInfo.isPullingDown) {
       setPullInfo(function (prev) {
         return _extends({}, prev, {
-          isPulling: false
+          isPulling: false,
+          reachRefreshRegion: false
         });
       });
 
       _reboundPullDown().then(function () {
         _afterPullDown();
       });
-    } else if (pullUpLoad) {
+    } else if (pullUpLoad || isPullUpEventEnable()) {
       setPullInfo(function (prev) {
         return _extends({}, prev, {
           isPullUpLoad: false
@@ -41934,7 +41938,7 @@ var BetterScrollList = function BetterScrollList(props) {
       ref: pulldownWrapperRef,
       style: style['pulldown-wrapper']
     }, pullInfo.beforePullDown ? React__default.createElement("div", {
-      style: style["before-trigger"]
+      style: style['before-trigger']
     }, React__default.createElement(PullLoadBubble, {
       bubbleRef: bubbleRef,
       y: bubbleY
@@ -41948,17 +41952,18 @@ var BetterScrollList = function BetterScrollList(props) {
 
   return React__default.createElement("div", {
     className: "rc-better-scroll__wrapper",
-    style: style["better-scroll__wrapper"],
+    style: style['better-scroll__wrapper'],
     ref: wrapperRef
   }, React__default.createElement("div", {
     style: style['scroll-content']
-  }, React__default.createElement("div", null, children), PullUpElement ? React__default.createElement(PullUpElement, {
-    isPullUpLoad: pullInfo.isPullUpLoad
-  }) : renderDefaultPullUpElement()), PullDownElement ? React__default.createElement(PullDownElement, {
+  }, PullDownElement ? React__default.createElement(PullDownElement, {
+    reachRefreshRegion: pullInfo.reachRefreshRegion,
     pulldownY: bubbleY,
     beforePullDown: pullInfo.beforePullDown,
     isPulling: pullInfo.isPulling
-  }) : renderDefaultPullDownElement());
+  }) : renderDefaultPullDownElement(), React__default.createElement("div", null, children), PullUpElement ? React__default.createElement(PullUpElement, {
+    isPullUpLoad: pullInfo.isPullUpLoad
+  }) : renderDefaultPullUpElement()));
 };
 
 exports.BetterScrollList = BetterScrollList;
@@ -42162,6 +42167,8 @@ var BetterScrollPage = function BetterScrollPage() {
     scrollbar: {
       fade: true
     },
+    onPullingUp: onPullingUp,
+    onPullingDown: onPullingDown,
     pullDownRefresh: {
       threshold: 90,
       stop: 40
@@ -42172,7 +42179,119 @@ var BetterScrollPage = function BetterScrollPage() {
         more: '加载更多',
         noMore: '没有更多数据了'
       }
+    }
+  }, React.createElement("ul", null, items.map(function (item, index) {
+    return React.createElement("li", {
+      className: "item"
+    }, index);
+  }))));
+};
+
+exports.default = BetterScrollPage;
+},{"../../../dist":"../dist/index.js","react":"../node_modules/react/index.js","./index.css":"betterScrollPage/asyncData/index.css"}],"betterScrollPage/customPullDown/index.css":[function(require,module,exports) {
+var reloadCSS = require('_css_loader');
+
+module.hot.dispose(reloadCSS);
+module.hot.accept(reloadCSS);
+},{"_css_loader":"node_modules/parcel/src/builtins/css-loader.js"}],"betterScrollPage/customPullDown/index.tsx":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var dist_1 = require("../../../dist");
+
+var react_1 = require("react");
+
+var React = require("react");
+
+require("./index.css");
+
+var BetterScrollPage = function BetterScrollPage() {
+  var bsListInstance = react_1.useRef();
+  var pageNo = react_1.useRef(1);
+  var pageSize = react_1.useRef(10);
+
+  var _a = react_1.useState([]),
+      items = _a[0],
+      setItems = _a[1];
+
+  react_1.useEffect(function () {
+    onPullingDown();
+    return function () {};
+  }, []);
+
+  var getMockDataFromServer = function getMockDataFromServer() {
+    var dataSource = new Array(45).fill(1);
+    return dataSource;
+  };
+
+  var getDataByPagination = function getDataByPagination(pagaination) {
+    var pageNo = pagaination.pageNo,
+        pageSize = pagaination.pageSize;
+    var data = getMockDataFromServer();
+    return data.slice(pageSize * (pageNo - 1), pageSize * pageNo);
+  };
+
+  var onPullingUp = function onPullingUp() {
+    console.log('上拉加载');
+    getData().then(function (res) {
+      console.log('res', res);
+      setItems(function (prev) {
+        return prev.concat(res);
+      });
+
+      if (res.length < 10) {
+        console.log('to end');
+        bsListInstance.current.forceUpdate(false);
+      } else {
+        bsListInstance.current.forceUpdate(true);
+      }
+    });
+  };
+
+  var onPullingDown = function onPullingDown() {
+    console.log('下拉刷新');
+    pageNo.current = 1;
+    getData().then(function (res) {
+      setItems(res);
+      bsListInstance.current.forceUpdate(true);
+    });
+  };
+
+  var getData = function getData() {
+    return new Promise(function (resolve) {
+      setTimeout(function () {
+        var arr = getDataByPagination({
+          pageNo: pageNo.current,
+          pageSize: pageSize.current
+        });
+        pageNo.current++;
+        resolve(arr);
+      }, 1000);
+    });
+  };
+
+  var PullDownComponent = function PullDownComponent(props) {
+    var beforePullDown = props.beforePullDown,
+        isPulling = props.isPulling,
+        reachRefreshRegion = props.reachRefreshRegion;
+    return React.createElement("div", {
+      className: "PullDownComponent"
+    }, beforePullDown ? reachRefreshRegion ? React.createElement("div", null, "\u677E\u5F00\u52A0\u8F7D") : React.createElement("div", null, "\u4E0B\u62C9\u52A0\u8F7D") : React.createElement(React.Fragment, null, isPulling ? React.createElement("div", null, "\u52A0\u8F7D\u4E2D") : React.createElement("div", null, "\u5237\u65B0\u6210\u529F")));
+  };
+
+  return React.createElement("div", {
+    className: "container"
+  }, React.createElement("div", {
+    className: "navbar"
+  }, "\u5BFC\u822A\u680F"), React.createElement(dist_1.BetterScrollList, {
+    bscrollListRef: bsListInstance,
+    scrollbar: {
+      fade: true
     },
+    PullDownElement: PullDownComponent,
     onPullingUp: onPullingUp,
     onPullingDown: onPullingDown
   }, React.createElement("ul", null, items.map(function (item, index) {
@@ -42183,7 +42302,7 @@ var BetterScrollPage = function BetterScrollPage() {
 };
 
 exports.default = BetterScrollPage;
-},{"../../../dist":"../dist/index.js","react":"../node_modules/react/index.js","./index.css":"betterScrollPage/asyncData/index.css"}],"hooks/UseHistorySubscribe.ts":[function(require,module,exports) {
+},{"../../../dist":"../dist/index.js","react":"../node_modules/react/index.js","./index.css":"betterScrollPage/customPullDown/index.css"}],"hooks/UseHistorySubscribe.ts":[function(require,module,exports) {
 "use strict";
 
 var __assign = this && this.__assign || function () {
@@ -42311,6 +42430,8 @@ var simple_1 = __importDefault(require("./betterScrollPage/simple"));
 
 var asyncData_1 = __importDefault(require("./betterScrollPage/asyncData"));
 
+var customPullDown_1 = __importDefault(require("./betterScrollPage/customPullDown"));
+
 var react_1 = require("react");
 
 var UseHistorySubscribe_1 = __importDefault(require("./hooks/UseHistorySubscribe"));
@@ -42322,6 +42443,7 @@ var DemoType;
 (function (DemoType) {
   DemoType["simple"] = "simple";
   DemoType["async"] = "async";
+  DemoType["customPulldown"] = "customPulldown";
 })(DemoType || (DemoType = {}));
 
 var App = function App() {
@@ -42334,6 +42456,10 @@ var App = function App() {
   }, {
     key: DemoType.async,
     value: React.createElement(asyncData_1.default, null),
+    visible: false
+  }, {
+    key: DemoType.customPulldown,
+    value: React.createElement(customPullDown_1.default, null),
     visible: false
   }];
 
@@ -42355,18 +42481,21 @@ var App = function App() {
       var prefix = window.location.href.split('?')[0];
       window.history.pushState({
         target: name
-      }, "", prefix + "?demoType=" + name);
+      }, '', prefix + "?demoType=" + name);
     };
   };
 
   var renderDemoOption = function renderDemoOption() {
-    return React.createElement(React.Fragment, null, " ", React.createElement("div", {
+    return React.createElement(React.Fragment, null, ' ', React.createElement("div", {
       className: "option-btn",
       onClick: navigateTo(DemoType.simple)
     }, "simple"), React.createElement("div", {
       className: "option-btn",
       onClick: navigateTo(DemoType.async)
-    }, "async"));
+    }, "async"), React.createElement("div", {
+      className: "option-btn",
+      onClick: navigateTo(DemoType.customPulldown)
+    }, "customPulldown"));
   };
 
   return React.createElement("div", {
@@ -42379,7 +42508,7 @@ var App = function App() {
 };
 
 ReactDOM.render(React.createElement(App, null), document.getElementById('root'));
-},{"react-app-polyfill/ie11":"node_modules/react-app-polyfill/ie11.js","react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/profiling.js","./betterScrollPage/simple":"betterScrollPage/simple/index.tsx","./betterScrollPage/asyncData":"betterScrollPage/asyncData/index.tsx","./hooks/UseHistorySubscribe":"hooks/UseHistorySubscribe.ts","./index.css":"index.css"}],"node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"react-app-polyfill/ie11":"node_modules/react-app-polyfill/ie11.js","react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/profiling.js","./betterScrollPage/simple":"betterScrollPage/simple/index.tsx","./betterScrollPage/asyncData":"betterScrollPage/asyncData/index.tsx","./betterScrollPage/customPullDown":"betterScrollPage/customPullDown/index.tsx","./hooks/UseHistorySubscribe":"hooks/UseHistorySubscribe.ts","./index.css":"index.css"}],"node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -42407,7 +42536,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "4451" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "2259" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
