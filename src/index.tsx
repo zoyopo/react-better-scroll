@@ -1,2 +1,4 @@
 import BetterScrollList from './BetterScrollList';
-export {BetterScrollList}
+import PulldownLoad from './PulldownLoad'
+import PullupRefresh from './PullupRefresh'
+export {BetterScrollList,PulldownLoad,PullupRefresh}

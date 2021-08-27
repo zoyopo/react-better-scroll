@@ -42,7 +42,7 @@ interface PullDownElementProps {
   isPulling: boolean;
   reachRefreshRegion: boolean;
 }
-interface Iprops {
+ export interface Iprops {
   children: ReactElement;
   PullUpElement?: React.FC<PullUpElementProps>;
   PullDownElement?: React.FC<PullDownElementProps>;
@@ -63,6 +63,8 @@ interface Iprops {
   onPullingUp?: () => void;
   bscrollListRef?: MutableRefObject<any>;
 }
+
+ type BetterScrollType = React.FC<Iprops>
 
 const style: { [props: string]: CSSProperties } = {
   'better-scroll__wrapper': {
@@ -93,7 +95,7 @@ const style: { [props: string]: CSSProperties } = {
   },
 };
 
-const BetterScrollList = (props: Iprops) => {
+const BetterScrollList:BetterScrollType = (props: Iprops) => {
   const {
     click = true,
     children,
