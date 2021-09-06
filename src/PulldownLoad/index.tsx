@@ -1,5 +1,4 @@
-
-import {Iprops as BsIprops} from '../BetterScrollList'
+import { Iprops as BsIprops } from '../BetterScrollList';
 import React, { ReactElement } from 'react';
 interface PullDownElementProps {
   beforePullDown: boolean;
@@ -15,28 +14,30 @@ type pullDownRefreshObj = {
 };
 interface Iprops {
   children: ReactElement<BsIprops>;
-  onPullingUp:()=>void 
+  onPullingUp: () => void;
 }
-type PullDownReaction ={
-  PullDownElement?: React.FC<PullDownElementProps>;
-  pullDownRefreshConfig:pullDownRefreshObj
-}|{
-  PullDownElement: React.FC<PullDownElementProps>;
-  pullDownRefreshConfig?:pullDownRefreshObj
-}|{
-  PullDownElement?: React.FC<PullDownElementProps>;
-  pullDownRefreshConfig?:pullDownRefreshObj
-}
-
-
-
+type PullDownReaction =
+  | {
+      PullDownElement?: React.FC<PullDownElementProps>;
+      pullDownRefreshConfig: pullDownRefreshObj;
+    }
+  | {
+      PullDownElement: React.FC<PullDownElementProps>;
+      pullDownRefreshConfig?: pullDownRefreshObj;
+    }
+  | {
+      PullDownElement?: React.FC<PullDownElementProps>;
+      pullDownRefreshConfig?: pullDownRefreshObj;
+    };
 
 const PulldownLoad = (props: Iprops & PullDownReaction) => {
-  const { children,pullDownRefreshConfig:pullDownRefresh, ...restProps } = props;
+  const {
+    children,
+    pullDownRefreshConfig: pullDownRefresh,
+    ...restProps
+  } = props;
 
-  return <>{React.cloneElement(children, {...restProps,pullDownRefresh})}</>;
+  return <>{React.cloneElement(children, { ...restProps, pullDownRefresh })}</>;
 };
 
-
-
-export default PulldownLoad
+export default PulldownLoad;
